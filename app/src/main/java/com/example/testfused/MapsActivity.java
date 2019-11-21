@@ -15,6 +15,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -81,7 +82,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         Log.d("debug", "計測開始");
         LatLng spot = new LatLng(35.7044997, 139.9843911);
-        mMap.addMarker(new MarkerOptions().position(spot).title("Marker in FJB"));
+        mMap.addMarker(
+                new MarkerOptions()
+                        .position(spot)
+                        .title("Marker in FJB")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.smile1)
+                        ));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(spot));
         //マップのズーム絶対値指定　1: 世界 5: 大陸 10:都市 15:街路 20:建物 ぐらいのサイズ
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15F));
