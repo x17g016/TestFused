@@ -1,9 +1,13 @@
 package com.example.testfused;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -24,6 +28,8 @@ import com.google.android.gms.tasks.Task;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
 
+    private static final int REQUEST_CODE = 1000;
+    private static final int REQUEST_PERMISSION = 1000;
     private FusedLocationProviderClient fusedLocationClient;
     private Location location;
     Toast toast; //デバック用
@@ -35,6 +41,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        // Android 6, API 23以上でパーミッションの確認
+        if(Build.VERSION.SDK_INT >= 23) {
+            String[] permissions = {
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            };
+            checkPermission(permissions, REQUEST_CODE);
+        }
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -91,6 +107,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(spot));
         //マップのズーム絶対値指定　1: 世界 5: 大陸 10:都市 15:街路 20:建物 ぐらいのサイズ
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15F));
-        mMap.setMyLocationEnabled(true);
+
     }
+
+    //許可されていないパーミッションリクエスト
+    public void checkPermission(final String[] permissions,final int request_code){
+        ActivityCompat.requestPermissions(this, permissions, request_code);
+    }
+
+    //結果
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSION) {
+            for (int i = 0; i < permissions.length; i++) {
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    mMap.setMyLocationEnabled(true);
+                    Log.d("Permission", "Added Permission: " + permissions[i]);
+                } else {
+                    // パーミッションが拒否された
+                    Log.d("Permission", "Rejected Permission: " + permissions[i]);
+                }
+            }
+        }
+    }
+
+
 }
