@@ -21,6 +21,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -32,6 +33,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int REQUEST_PERMISSION = 1000;
     private FusedLocationProviderClient fusedLocationClient;
     private Location location;
+    private Marker mm = null;
     Toast toast; //デバック用
 
     private GoogleMap mMap;
@@ -43,10 +45,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         // Android 6, API 23以上でパーミッションの確認
-        if(Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             String[] permissions = {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.INTERNET
             };
             checkPermission(permissions, REQUEST_CODE);
         }
@@ -83,6 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     location = task.getResult();
                                     toast = Toast.makeText(MapsActivity.this, "緯度" + location.getLatitude() + "\n" + "経度" + location.getLongitude(), Toast.LENGTH_LONG);
                                     toast.show();
+                                    Log.d("debug", "緯度" + location.getLatitude() + "\n" + "経度" + location.getLongitude());
                                     Log.d("debug", "計測成功");
                                 } else {
                                     toast = Toast.makeText(MapsActivity.this, "計測不能", Toast.LENGTH_LONG);
@@ -98,24 +102,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         Log.d("debug", "計測開始");
         LatLng spot = new LatLng(35.7044997, 139.9843911);
-        mMap.addMarker(
+        mm = mMap.addMarker(
                 new MarkerOptions()
                         .position(spot)
                         .title("Marker in FJB")
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.smile1)
                         ));
+        mMap.clear();
+        LatLng spot2 = new LatLng(35.7044800, 139.9843800);
+        mm = mMap.addMarker(
+                new MarkerOptions()
+                        .position(spot2)
+                        .title("Marker in TIGA")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.smile1)
+                        ));
+        LatLng spot3 = new LatLng(35.7044400, 139.9843400);
+        mm = mMap.addMarker(
+                new MarkerOptions()
+                        .position(spot3)
+                        .title("Marker in TIT")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.smile1)
+                        ));
+        // マーカークリック時のイベントハンドラ登録
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                // TODO Auto-generated method stub
+                String id = marker.getId();
+                String msg = "IDは" + id;
+                /*if (id.equals("m0")) {
+                    msg = "関西国際空港(" + id + ")";
+                } else if (id.equals("m1")) {
+                    msg = "伊丹空港(" + id + ")";
+                } else if (id.equals("m2")) {
+                    msg = "神戸空港(" + id + ")";
+                }*/
+                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                return false;
+            }
+        });
         mMap.moveCamera(CameraUpdateFactory.newLatLng(spot));
         //マップのズーム絶対値指定　1: 世界 5: 大陸 10:都市 15:街路 20:建物 ぐらいのサイズ
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15F));
-
     }
 
     //許可されていないパーミッションリクエスト
-    public void checkPermission(final String[] permissions,final int request_code){
+    public void checkPermission(final String[] permissions, final int request_code) {
         ActivityCompat.requestPermissions(this, permissions, request_code);
     }
 
-    //結果
+    //パーミッション結果
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSION) {
